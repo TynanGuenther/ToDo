@@ -1,13 +1,15 @@
 sub process_args(*@input) {
-    @input.antipairs.map({ given *.key {
-         when 'i' {
-             die "Must be longer than 1" unless @input[*.value].chars > 1;
-             &input( *.value+1  );
-         }
-         default {
-             say "Unknown";
-         }
-     }});
+    @input.antipairs.map(-> $pairs { 
+        given $pairs.key {
+            when 'i' {
+                die "Must be longer than 1" unless @input[$pairs.value+1].chars > 1;
+                &input( @input[$pairs.value + 1]  );
+            }
+            when 'd' {
+                die "Must be an integer";
+            }
+        }
+    });
 }
 
 sub input( $key ) {
