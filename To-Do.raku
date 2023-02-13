@@ -1,9 +1,9 @@
 use Slang::SQL;
 use DBIish;
 
-my $*db = DBIish.connect("SQLite", :database<ToDo.db>);
+my $*DB = DBIish.connect("SQLite", :database<ToDo.sqlite3>);
 
-my @thing;
+#my @thing;
 
 sub process_args(*@input) {
     @input.antipairs.map(-> $pairs { 
@@ -25,24 +25,32 @@ sub process_args(*@input) {
 }
 
 sub delete( $index ) {
-    @thing.splice($index-1, 1);
+    sql delete from thing where id > ?; with ($index);
+    #    @thing.splice($index-1, 1);
 }
 
 sub input( $item ) {
-    @thing.push($item)
+    my $back = sql select LAST(num) as back from count;
+    sql insert into thing (id, item) values (, ?); with ($item);
+
+    #@thing.push($item)
 }
 
 sub move ( $old, $new){
-    my $item = @thing[$old];
-    &delete($old);
-    &input($new, $item);
+
+    #my $item = @thing[$old];
+    #&delete($old);
+    #&input($new, $item);
 } 
 sub print(){
-    @thing.antipairs.map(-> $item {
-        my $index = $item.value + 1;
-        my $val = $item.key;
-        say "[$index]\t$val";
-    });
+    sql select * from thing; do -> $row {
+        "{$row<id>}\t{$row<item>}".say;
+    };
+    #@thing.antipairs.map(-> $item {
+        #    my $index = $item.value + 1;
+        #my $val = $item.key;
+        #say "[$index]\t$val";
+        #});
 }
 
 sub MAIN(*@input) {
