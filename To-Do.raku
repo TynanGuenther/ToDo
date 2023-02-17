@@ -1,9 +1,15 @@
-use Slang::SQL;
-use DBIish;
 
-my $*DB = DBIish.connect("SQLite", :database<ToDo.sqlite3>);
+use JSON::Fast;
 
-#my @thing;
+
+my @thing;
+my $nam = "todo.json";
+class Item {
+    has $.index;
+    has $.val;
+}
+#$nam.IO.f ?? my $file = open $nam, :w, :r !! $file = open $nam, :w; 
+#my $file = open $nam, :w;
 
 sub process_args(*@input) {
     @input.antipairs.map(-> $pairs { 
@@ -14,7 +20,7 @@ sub process_args(*@input) {
                 &input( @input[$pairs.value + 1]  );
             }
             when 'd' {
-                $next.Int  ?? &delete($next) !! die "Must be an int";
+                $next.Int ?? &delete($next) !! die "Must be an int greater than 0";
             }
             when 'p' {
                 &print();
@@ -25,15 +31,26 @@ sub process_args(*@input) {
 }
 
 sub delete( $index ) {
-    sql delete from thing where id > ?; with ($index);
-    #    @thing.splice($index-1, 1);
+    my @input = from-json("todo.json".IO.slurp);
+    @input.splice($index - 1, 1);
+    say @input;
+    #    $file.print(to-json @input);
+
 }
 
 sub input( $item ) {
-    my $back = sql select LAST(num) as back from count;
-    sql insert into thing (id, item) values (, ?); with ($item);
-
-    #@thing.push($item)
+    if "todo.json".IO.s { 
+        my @l = (from-json "todo.json".IO.slurp);
+        my $count = @l.elems + 1;
+        my Pair $par = (index => $count, value => $item);
+        @l.append: $par;
+        spurt "todo.json", (to-json @l);
+    }
+    else {
+        say "Creating New File";
+        my Pair $par = (index => 0, value => $item);
+        spurt "todo.json", (to-json $par);
+    }
 }
 
 sub move ( $old, $new){
@@ -43,18 +60,16 @@ sub move ( $old, $new){
     #&input($new, $item);
 } 
 sub print(){
-    sql select * from thing; do -> $row {
-        "{$row<id>}\t{$row<item>}".say;
-    };
-    #@thing.antipairs.map(-> $item {
-        #    my $index = $item.value + 1;
-        #my $val = $item.key;
-        #say "[$index]\t$val";
-        #});
+    "todo.json".IO.s ?? my @l = (from-json "todo.json".IO.slurp) !! say "To-Do List is Empty!!" && return;
+    @l.map(-> $item {
+        my $index = $item.keys;
+        my $val = $item.values;
+        say "[$index]\t$val fuck";
+    });
+
 }
 
 sub MAIN(*@input) {
     process_args(@input);
-    &print();
 }
 
