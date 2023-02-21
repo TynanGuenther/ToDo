@@ -42,13 +42,13 @@ sub input( $item ) {
     if "todo.json".IO.s { 
         my @l = (from-json "todo.json".IO.slurp);
         my $count = @l.elems + 1;
-        my Pair $par = (index => $count, value => $item);
+        my Pair $par = $count => $item;
         @l.append: $par;
         spurt "todo.json", (to-json @l);
     }
     else {
         say "Creating New File";
-        my Pair $par = (index => 0, value => $item);
+        my Pair $par = 1 => $item;
         spurt "todo.json", (to-json $par);
     }
 }
@@ -60,12 +60,15 @@ sub move ( $old, $new){
     #&input($new, $item);
 } 
 sub print(){
-    "todo.json".IO.s ?? my @l = (from-json "todo.json".IO.slurp) !! say "To-Do List is Empty!!" && return;
-    @l.map(-> $item {
-        my $index = $item.keys;
-        my $val = $item.values;
-        say "[$index]\t$val fuck";
-    });
+    die "To-Do list is empty!!" unless "todo.json".IO.s;
+    my @l = (from-json "todo.json".IO.slurp);
+    say "\n\t\e[1m\e[4mToDo\e[0m\e[0m";
+    for @l {
+        my $index = $_.keys;
+        my $val = $_.values;
+        say "[$index]\t$val";
+    }
+    say "\n";
 
 }
 
