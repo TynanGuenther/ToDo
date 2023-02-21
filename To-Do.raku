@@ -1,6 +1,4 @@
-
 use JSON::Fast;
-
 
 my $file = "todo.json";
 
@@ -18,7 +16,9 @@ sub process_args(*@input) {
             when 'p' {
                 &print();
             }
-
+            when 'h' {
+                &help();
+            }
         }
     });
 }
@@ -60,6 +60,15 @@ sub print(){
     say "\n";
 
 }
+sub help(){
+    say "\n\t\e[1m\e[4mToDo\e[0m\e[0m\n";
+    say "Commands:\tResults:
+        \n\tp:\tPrints out the To-Do list;
+        \n\ti:\"blah\":\tInserts \"blah\" into the To-Do list
+        \n\t\tif the item is more than one word make sure to add quotes;
+        \n\td 0:\tDeletes the item at the Index provided. Must be an integer;  
+        \n\th:\t Prints out this helpful message;";
+    }
 
 sub MAIN(*@input) {
     process_args(@input);
